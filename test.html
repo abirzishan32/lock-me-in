@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Monitor - Test Page</title>
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .demo-content {
+            background: #f5f5f5;
+            padding: 40px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .demo-content h2 {
+            color: #444;
+        }
+        .demo-content p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+        .instructions {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #1976D2;
+        }
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin: 8px 0;
+            color: #555;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>👁️ Focus Monitor - Test Page</h1>
+        <p class="subtitle">Use this page to test the focus monitoring functionality before adding to Tampermonkey</p>
+        
+        <div class="warning-box">
+            <strong>⚠️ Important:</strong> Make sure you're running a local server for the models folder!
+            <br>
+            Run: <code>python3 -m http.server 8000</code> in the project directory
+        </div>
+
+        <div class="instructions">
+            <h3>How to Use This Test Page</h3>
+            <ol>
+                <li>Make sure the local server is running (see warning above)</li>
+                <li>Click the "Start" button that will appear in the top-right corner</li>
+                <li>Grant webcam permission when prompted</li>
+                <li>Keep your face in view - you should see "✅ Focused"</li>
+                <li>Look away from the screen to test the away detection</li>
+                <li>After 5 seconds, you should see a red warning screen</li>
+            </ol>
+        </div>
+
+        <div class="demo-content">
+            <h2>Sample Content for Testing</h2>
+            <p>
+                This is sample content that you would normally read or work with.
+                The focus monitor will track whether you're looking at the screen.
+            </p>
+            <p>
+                Try looking away from the screen for more than 5 seconds to trigger the warning.
+                The system uses face detection to determine if you're focused.
+            </p>
+            <p>
+                When the warning appears, click "I'm Back!" to dismiss it and reset the timer.
+            </p>
+            
+            <div style="margin-top: 30px; padding: 20px; background: white; border-radius: 8px;">
+                <h3>Tips for Best Results</h3>
+                <ul style="text-align: left; display: inline-block;">
+                    <li>Ensure good lighting on your face</li>
+                    <li>Position yourself directly in front of the camera</li>
+                    <li>Remove anything blocking your face (sunglasses, hat, etc.)</li>
+                    <li>Stay within 1-3 feet of the camera</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>Next Steps</h3>
+            <ol>
+                <li>If everything works here, copy the script from <code>script.js</code></li>
+                <li>Open Tampermonkey and create a new script</li>
+                <li>Paste the script and save it</li>
+                <li>The focus monitor will now work on all websites!</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Load the focus monitoring script -->
+    <script>
+        // Note: In the actual Tampermonkey version, this would be the userscript
+        // For this test page, we'll inline a simplified version
+        
+        // Configuration
+        const CONFIG = {
+            WARNING_THRESHOLD: 5000,
+            CHECK_INTERVAL: 500,
+            MODEL_URL: 'http://localhost:8000/models',
+            MIN_CONFIDENCE: 0.5
+        };
+
+        // State management
+        let state = {
+            isActive: false,
+            video: null,
+            modelsLoaded: false,
+            lastFaceDetectedTime: Date.now(),
+            warningShown: false,
+            detectionInterval: null,
+            stream: null
+        };
+
+        // Create UI overlay
+        function createUI() {
+            const video = document.createElement('video');
+            video.id = 'focus-monitor-video';
+            video.autoplay = true;
+            video.muted = true;
+            video.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                width: 200px;
+                height: 150px;
+                border: 2px solid #4CAF50;
+                border-radius: 8px;
+                z-index: 999998;
+                display: none;
+            `;
+            document.body.appendChild(video);
+            state.video = video;
+
+            const controlPanel = document.createElement('div');
+            controlPanel.id = 'focus-monitor-panel';
+            controlPanel.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(0, 0, 0, 0.85);
+                color: white;
+                padding: 15px;
+                border-radius: 8px;
+                z-index: 999999;
+                font-family: Arial, sans-serif;
+                min-width: 250px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            `;
+            controlPanel.innerHTML = `
+                <div style="margin-bottom: 10px;">
+                    <strong>👁️ Focus Monitor</strong>
+                </div>
+                <div style="margin-bottom: 10px; font-size: 12px;">
+                    <span id="focus-status">Initializing...</span>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <button id="toggle-monitor" style="
+                        background: #4CAF50;
+                        color: white;
+                        border: none;
+                        padding: 8px 15px;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        font-size: 12px;
+                        margin-right: 5px;
+                    ">Start</button>
+                    <button id="toggle-video" style="
+                        background: #2196F3;
+                        color: white;
+                        border: none;
+                        padding: 8px 15px;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        font-size: 12px;
+                    ">Show Video</button>
+                </div>
+                <div style="font-size: 11px; color: #aaa;">
+                    Away time: <span id="away-time">0s</span>
+                </div>
+            `;
+            document.body.appendChild(controlPanel);
+
+            const warningOverlay = document.createElement('div');
+            warningOverlay.id = 'focus-warning';
+            warningOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(255, 0, 0, 0.8);
+                color: white;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000000;
+                font-family: Arial, sans-serif;
+            `;
+            warningOverlay.innerHTML = `
+                <div style="text-align: center;">
+                    <h1 style="font-size: 48px; margin-bottom: 20px;">⚠️ FOCUS!</h1>
+                    <p style="font-size: 24px;">You're losing focus! Look at the screen!</p>
+                    <button id="dismiss-warning" style="
+                        background: white;
+                        color: red;
+                        border: none;
+                        padding: 15px 30px;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        font-size: 18px;
+                        margin-top: 20px;
+                        font-weight: bold;
+                    ">I'm Back!</button>
+                </div>
+            `;
+            document.body.appendChild(warningOverlay);
+
+            document.getElementById('toggle-monitor').addEventListener('click', toggleMonitoring);
+            document.getElementById('toggle-video').addEventListener('click', toggleVideo);
+            document.getElementById('dismiss-warning').addEventListener('click', dismissWarning);
+        }
+
+        async function loadModels() {
+            updateStatus('Loading AI models...');
+            try {
+                await Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri(CONFIG.MODEL_URL),
+                    faceapi.nets.faceLandmark68TinyNet.loadFromUri(CONFIG.MODEL_URL)
+                ]);
+                state.modelsLoaded = true;
+                updateStatus('Models loaded! Ready to start.');
+                return true;
+            } catch (error) {
+                console.error('Error loading models:', error);
+                updateStatus('⚠️ Error: Models not loaded');
+                alert('Please start a local server:\n\ncd "/Volumes/Meow 2/lock-me-in"\npython3 -m http.server 8000\n\nThen refresh this page.');
+                return false;
+            }
+        }
+
+        async function startWebcam() {
+            try {
+                state.stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 640, height: 480 } 
+                });
+                state.video.srcObject = state.stream;
+                return true;
+            } catch (error) {
+                console.error('Error accessing webcam:', error);
+                updateStatus('⚠️ Webcam access denied');
+                alert('Please allow webcam access');
+                return false;
+            }
+        }
+
+        function stopWebcam() {
+            if (state.stream) {
+                state.stream.getTracks().forEach(track => track.stop());
+                state.stream = null;
+            }
+        }
+
+        async function detectFace() {
+            if (!state.video || !state.isActive) return;
+
+            try {
+                const detection = await faceapi.detectSingleFace(
+                    state.video, 
+                    new faceapi.TinyFaceDetectorOptions({ 
+                        inputSize: 224,
+                        scoreThreshold: CONFIG.MIN_CONFIDENCE 
+                    })
+                ).withFaceLandmarks(true);
+
+                const now = Date.now();
+                
+                if (detection) {
+                    state.lastFaceDetectedTime = now;
+                    state.warningShown = false;
+                    updateStatus('✅ Focused');
+                    updateAwayTime(0);
+                    hideWarning();
+                } else {
+                    const awayTime = now - state.lastFaceDetectedTime;
+                    const awaySeconds = Math.floor(awayTime / 1000);
+                    updateStatus(`⚠️ Not focused (${awaySeconds}s)`);
+                    updateAwayTime(awaySeconds);
+
+                    if (awayTime >= CONFIG.WARNING_THRESHOLD && !state.warningShown) {
+                        showWarning();
+                        state.warningShown = true;
+                    }
+                }
+            } catch (error) {
+                console.error('Detection error:', error);
+            }
+        }
+
+        async function toggleMonitoring() {
+            const button = document.getElementById('toggle-monitor');
+            
+            if (!state.modelsLoaded) {
+                const loaded = await loadModels();
+                if (!loaded) return;
+            }
+
+            if (!state.isActive) {
+                const webcamStarted = await startWebcam();
+                if (!webcamStarted) return;
+
+                state.isActive = true;
+                state.lastFaceDetectedTime = Date.now();
+                state.detectionInterval = setInterval(detectFace, CONFIG.CHECK_INTERVAL);
+                
+                button.textContent = 'Stop';
+                button.style.background = '#f44336';
+                updateStatus('🔍 Monitoring...');
+            } else {
+                state.isActive = false;
+                clearInterval(state.detectionInterval);
+                stopWebcam();
+                
+                button.textContent = 'Start';
+                button.style.background = '#4CAF50';
+                updateStatus('Stopped');
+                hideWarning();
+                updateAwayTime(0);
+            }
+        }
+
+        function toggleVideo() {
+            const button = document.getElementById('toggle-video');
+            if (state.video.style.display === 'none') {
+                state.video.style.display = 'block';
+                button.textContent = 'Hide Video';
+            } else {
+                state.video.style.display = 'none';
+                button.textContent = 'Show Video';
+            }
+        }
+
+        function showWarning() {
+            document.getElementById('focus-warning').style.display = 'flex';
+        }
+
+        function hideWarning() {
+            document.getElementById('focus-warning').style.display = 'none';
+        }
+
+        function dismissWarning() {
+            hideWarning();
+            state.lastFaceDetectedTime = Date.now();
+            state.warningShown = false;
+        }
+
+        function updateStatus(text) {
+            const statusEl = document.getElementById('focus-status');
+            if (statusEl) statusEl.textContent = text;
+        }
+
+        function updateAwayTime(seconds) {
+            const awayTimeEl = document.getElementById('away-time');
+            if (awayTimeEl) awayTimeEl.textContent = `${seconds}s`;
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            createUI();
+            console.log('Focus Monitor test page loaded');
+        });
+    </script>
+</body>
+</html>
