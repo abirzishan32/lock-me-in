@@ -1,4 +1,4 @@
-# Focus Monitor Chrome Extension
+# Lock Me In Chrome Extension
 
 A standalone Chrome extension that monitors your focus using facial detection technology. No external servers or Tampermonkey required!
 

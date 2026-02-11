@@ -1,4 +1,4 @@
-# 👁️ Lock Me In - Focus Monitor
+# 👁️ Lock Me In - Lock Me In
 
 A browser extension that helps you stay focused by monitoring your attention using facial detection technology. Get alerted when you look away from your work!
 

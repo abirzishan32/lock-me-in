@@ -1,9 +1,9 @@
 @echo off
-REM Setup script for Focus Monitor Chrome Extension (Windows)
+REM Setup script for Lock Me In Chrome Extension (Windows)
 REM This script downloads the required face-api.js library
 
 echo.
-echo 📦 Focus Monitor Extension Setup
+echo 📦 Lock Me In Extension Setup
 echo ================================
 echo.
 

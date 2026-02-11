@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Setup script for Focus Monitor Chrome Extension
+# Setup script for Lock Me In Chrome Extension
 # This script downloads the required face-api.js library
 
-echo "📦 Focus Monitor Extension Setup"
+echo "📦 Lock Me In Extension Setup"
 echo "================================"
 echo ""
 

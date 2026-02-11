@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Focus Monitor - Eye Tracking (Slim UI)
+// @name         Lock Me In - Eye Tracking (Slim UI)
 // @namespace    http://tampermonkey.net/
 // @version      1.2
 // @description  Monitor user focus with a minimalist, non-intrusive UI

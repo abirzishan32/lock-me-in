@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focus Monitor - Test Page</title>
+    <title>Lock Me In - Test Page</title>
     <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <style>
         body {
@@ -80,8 +80,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>👁️ Focus Monitor - Test Page</h1>
-        <p class="subtitle">Use this page to test the focus monitoring functionality before adding to Tampermonkey</p>
+        <h1>👁️ Lock Me In - Test Page</h1>
+        <p class="subtitle">Use this page to test the Lock Me Ining functionality before adding to Tampermonkey</p>
         
         <div class="warning-box">
             <strong>⚠️ Important:</strong> Make sure you're running a local server for the models folder!
@@ -105,7 +105,7 @@
             <h2>Sample Content for Testing</h2>
             <p>
                 This is sample content that you would normally read or work with.
-                The focus monitor will track whether you're looking at the screen.
+                The Lock Me In will track whether you're looking at the screen.
             </p>
             <p>
                 Try looking away from the screen for more than 5 seconds to trigger the warning.
@@ -132,12 +132,12 @@
                 <li>If everything works here, copy the script from <code>script.js</code></li>
                 <li>Open Tampermonkey and create a new script</li>
                 <li>Paste the script and save it</li>
-                <li>The focus monitor will now work on all websites!</li>
+                <li>The Lock Me In will now work on all websites!</li>
             </ol>
         </div>
     </div>
 
-    <!-- Load the focus monitoring script -->
+    <!-- Load the Lock Me Ining script -->
     <script>
         // Note: In the actual Tampermonkey version, this would be the userscript
         // For this test page, we'll inline a simplified version
@@ -198,7 +198,7 @@
             `;
             controlPanel.innerHTML = `
                 <div style="margin-bottom: 10px;">
-                    <strong>👁️ Focus Monitor</strong>
+                    <strong>👁️ Lock Me In</strong>
                 </div>
                 <div style="margin-bottom: 10px; font-size: 12px;">
                     <span id="focus-status">Initializing...</span>
@@ -416,7 +416,7 @@
         // Initialize
         window.addEventListener('load', () => {
             createUI();
-            console.log('Focus Monitor test page loaded');
+            console.log('Lock Me In test page loaded');
         });
     </script>
 </body>

@@ -28,7 +28,7 @@ def run(port=8000):
     server_address = ('', port)
     httpd = HTTPServer(server_address, CORSRequestHandler)
     print("=" * 60)
-    print("  Focus Monitor - CORS-enabled Server")
+    print("  Lock Me In - CORS-enabled Server")
     print("=" * 60)
     print(f"\n✅ Server running on http://localhost:{port}/")
     print(f"📦 Models available at http://localhost:{port}/models/")

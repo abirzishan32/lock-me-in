@@ -1,4 +1,4 @@
-// Focus Monitor - Eye Tracking (Chrome Extension)
+// Lock Me In - Eye Tracking (Chrome Extension)
 // Converted from Tampermonkey userscript to standalone extension
 
 (function() {

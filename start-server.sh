@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Focus Monitor - Quick Start Script
+# Lock Me In - Quick Start Script
 # This script starts a local server to serve the face detection models
 
 echo "========================================="
-echo "  Focus Monitor - Starting Local Server"
+echo "  Lock Me In - Starting Local Server"
 echo "========================================="
 echo ""
 
