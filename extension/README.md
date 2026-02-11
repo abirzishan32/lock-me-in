@@ -8,7 +8,18 @@ A standalone Chrome extension that monitors your focus using facial detection te
 
 Before loading the extension, you need to download the face-api.js library:
 
-**Option A: Using curl/wget (Recommended)**
+**Option A: Automated Setup Script (Easiest!)**
+```bash
+# Linux/Mac
+cd extension
+./setup.sh
+
+# Windows
+cd extension
+setup.bat
+```
+
+**Option B: Using curl/wget**
 ```bash
 cd extension
 curl -L -o face-api.min.js "https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"
@@ -20,7 +31,7 @@ cd extension
 wget -O face-api.min.js "https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"
 ```
 
-**Option B: Manual Download**
+**Option C: Manual Download**
 1. Visit: https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js
 2. Save the file (Right-click → Save As)
 3. Save it as `face-api.min.js` in the `extension/` folder
