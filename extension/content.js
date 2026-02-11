@@ -32,29 +32,66 @@
         const videoWrapper = document.createElement('div');
         videoWrapper.id = 'focus-video-container';
         videoWrapper.style.cssText = `
-            position: fixed; bottom: 20px; right: 20px; width: 200px; height: 150px;
+            position: fixed; bottom: 20px; right: 20px; width: 220px; height: 165px;
             z-index: 999998; display: none; border-radius: 8px; overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4); border: 3px solid #4CAF50;
-            transition: border-color 0.3s;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4); border: 2px solid #4CAF50;
+            background: #000; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         `;
 
         const video = document.createElement('video');
         video.id = 'focus-monitor-video';
         video.autoplay = true;
         video.muted = true;
-        video.style.cssText = `width: 100%; height: 100%; object-fit: cover;`;
+        video.style.cssText = `width: 100%; height: 100%; object-fit: cover; transition: filter 0.3s;`;
         
+        // Custom HUD Bar with Controls
+        const hudBar = document.createElement('div');
+        hudBar.id = 'video-hud-bar';
+        hudBar.style.cssText = `
+            position: absolute; top: 0; left: 0; width: 100%; padding: 8px; box-sizing: border-box;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
+            display: flex; justify-content: space-between; align-items: flex-start;
+            pointer-events: none; transition: opacity 0.2s;
+        `;
+
         const statusOverlay = document.createElement('div');
         statusOverlay.id = 'video-status-hud';
         statusOverlay.style.cssText = `
-            position: absolute; top: 8px; left: 8px; padding: 2px 6px;
-            background: rgba(0,0,0,0.7); color: #4CAF50; font-family: 'Segoe UI', Tahoma, sans-serif;
+            padding: 2px 6px; background: rgba(0,0,0,0.6); color: #4CAF50; font-family: 'Segoe UI', sans-serif;
             font-weight: bold; font-size: 10px; border-radius: 4px; text-transform: uppercase;
+            pointer-events: auto; backdrop-filter: blur(2px);
         `;
         statusOverlay.textContent = 'READY';
 
+        const controls = document.createElement('div');
+        controls.style.cssText = `display: flex; gap: 4px; pointer-events: auto;`;
+        
+        const createBtn = (text, id, title) => {
+            const btn = document.createElement('button');
+            btn.id = id;
+            btn.textContent = text;
+            btn.title = title;
+            btn.style.cssText = `
+                background: rgba(255,255,255,0.15); color: white; border: none; border-radius: 4px;
+                width: 20px; height: 20px; cursor: pointer; font-size: 12px; line-height: 1;
+                display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px);
+                transition: background 0.2s; padding: 0;
+            `;
+            btn.onmouseover = () => btn.style.background = 'rgba(255,255,255,0.3)';
+            btn.onmouseout = () => btn.style.background = 'rgba(255,255,255,0.15)';
+            return btn;
+        };
+
+        const btnBlur = createBtn('💧', 'btn-video-blur', 'Blur Video');
+        const btnMin = createBtn('_', 'btn-video-min', 'Minimize');
+
+        controls.appendChild(btnBlur);
+        controls.appendChild(btnMin);
+        hudBar.appendChild(statusOverlay);
+        hudBar.appendChild(controls);
+
         videoWrapper.appendChild(video);
-        videoWrapper.appendChild(statusOverlay);
+        videoWrapper.appendChild(hudBar);
         document.body.appendChild(videoWrapper);
         state.video = video;
 
@@ -83,6 +120,24 @@
             .panel-content {
                 width: 300px; padding: 15px; box-sizing: border-box;
             }
+            /* Video States */
+            #focus-monitor-video.blurred {
+                filter: blur(15px);
+                transform: scale(1.1);
+            }
+            #focus-video-container.minimized {
+                height: 36px !important;
+                width: 140px !important;
+                border-width: 1px !important;
+                bottom: 20px !important; /* Keep position */
+            }
+            #focus-video-container.minimized #focus-monitor-video {
+                opacity: 0;
+            }
+            #focus-video-container.minimized #video-hud-bar {
+                background: none;
+                padding: 6px;
+            }
         `;
         document.head.appendChild(style);
 
@@ -91,7 +146,7 @@
         
         controlPanel.innerHTML = `
             <div id="panel-tab">
-                <div style="writing-mode: vertical-rl; font-size: 10px; letter-spacing: 1px; color: #aaa; text-transform: uppercase; font-weight: bold; opacity: 0.8;">FOCUS</div>
+                <div style="writing-mode: vertical-rl; font-size: 10px; letter-spacing: 1px; color: #aaa; text-transform: uppercase; font-weight: bold; opacity: 0.8;">Lock Me In</div>
                 <div id="collapse-icon" style="font-size: 10px; color: #888;">◀</div>
             </div>
             
@@ -127,6 +182,20 @@
         document.getElementById('toggle-video').addEventListener('click', toggleVideo);
         document.getElementById('dismiss-warning').addEventListener('click', dismissWarning);
         document.getElementById('panel-tab').addEventListener('click', togglePanel);
+        
+        // Video Control Listeners
+        document.getElementById('btn-video-blur').addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('focus-monitor-video').classList.toggle('blurred');
+        });
+        document.getElementById('btn-video-min').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const container = document.getElementById('focus-video-container');
+            const btn = document.getElementById('btn-video-min');
+            const isMin = container.classList.toggle('minimized');
+            btn.textContent = isMin ? '□' : '_';
+            btn.title = isMin ? 'Maximize' : 'Minimize';
+        });
     }
 
     async function detectFace() {
