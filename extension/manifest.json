@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Lock Me In - Eye Tracking",
+  "name": "Lock Me In",
   "version": "2.0",
   "description": "Monitor user focus with eye tracking technology",
   "permissions": [

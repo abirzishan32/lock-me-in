@@ -83,7 +83,7 @@
                 justify-content: center; cursor: pointer; border-right: 1px solid #333;
                 gap: 10px; padding: 15px 0;
             ">
-                <div style="writing-mode: vertical-rl; font-size: 10px; letter-spacing: 1px; color: #bbb; text-transform: uppercase; font-weight: bold;">FOCUS</div>
+                <div style="writing-mode: vertical-rl; font-size: 10px; letter-spacing: 1px; color: #bbb; text-transform: uppercase; font-weight: bold;">Lock Me In</div>
                 <div id="collapse-icon" style="font-size: 10px; color: #888;">◀</div>
             </div>
             
@@ -109,7 +109,7 @@
             z-index: 1000000; font-family: sans-serif;
         `;
         warningOverlay.innerHTML = `
-            <h1 style="font-size: 48px; margin-bottom: 10px;">EYES ON SCREEN</h1>
+            <h1 style="font-size: 48px; margin-bottom: 10px;">YOU ARE DISTRACTED! STAY FOCUSED!</h1>
             <button id="dismiss-warning" style="padding: 12px 30px; border-radius: 4px; border: none; cursor: pointer; background: white; color: #b40000; font-weight: bold;">BACK TO WORK</button>
         `;
         document.body.appendChild(warningOverlay);

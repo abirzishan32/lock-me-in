@@ -59,27 +59,43 @@
         state.video = video;
 
         // --- Minimalist Slim Sidebar ---
+        // Inject Styling for better control and smooth transitions
+        const style = document.createElement('style');
+        style.textContent = `
+            #focus-monitor-panel {
+                position: fixed; top: 50%; right: -300px; transform: translateY(-50%);
+                background: #121212; color: white; border-radius: 8px 0 0 8px;
+                z-index: 999999; font-family: 'Segoe UI', sans-serif; box-shadow: -2px 0 15px rgba(0,0,0,0.5);
+                transition: right 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex;
+            }
+            #focus-monitor-panel.expanded {
+                right: 0 !important;
+            }
+            #panel-tab {
+                width: 20px; background: rgba(20, 20, 20, 0.4); border-radius: 8px 0 0 8px;
+                display: flex; flex-direction: column; align-items: center;
+                justify-content: center; cursor: pointer; border-right: 1px solid rgba(255,255,255,0.05);
+                gap: 10px; padding: 15px 0; transition: all 0.3s ease; backdrop-filter: blur(4px);
+            }
+            #panel-tab:hover {
+                background: #252525; opacity: 1; width: 20px;
+            }
+            .panel-content {
+                width: 300px; padding: 15px; box-sizing: border-box;
+            }
+        `;
+        document.head.appendChild(style);
+
         const controlPanel = document.createElement('div');
         controlPanel.id = 'focus-monitor-panel';
-        controlPanel.style.cssText = `
-            position: fixed; top: 50%; right: -260px; transform: translateY(-50%);
-            background: #121212; color: white; border-radius: 8px 0 0 8px;
-            z-index: 999999; font-family: sans-serif; box-shadow: -2px 0 15px rgba(0,0,0,0.5);
-            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex;
-        `;
         
         controlPanel.innerHTML = `
-            <div id="panel-tab" style="
-                width: 24px; background: #252525; border-radius: 8px 0 0 8px;
-                display: flex; flex-direction: column; align-items: center;
-                justify-content: center; cursor: pointer; border-right: 1px solid #333;
-                gap: 10px; padding: 15px 0;
-            ">
-                <div style="writing-mode: vertical-rl; font-size: 10px; letter-spacing: 1px; color: #bbb; text-transform: uppercase; font-weight: bold;">FOCUS</div>
+            <div id="panel-tab">
+                <div style="writing-mode: vertical-rl; font-size: 10px; letter-spacing: 1px; color: #aaa; text-transform: uppercase; font-weight: bold; opacity: 0.8;">FOCUS</div>
                 <div id="collapse-icon" style="font-size: 10px; color: #888;">◀</div>
             </div>
             
-            <div style="width: 260px; padding: 15px;">
+            <div class="panel-content">
                 <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #eee;">Session Controls</h4>
                 <div style="display: flex; gap: 8px;">
                     <button id="toggle-monitor" style="flex: 2; padding: 8px; border-radius: 4px; border: none; background: #4CAF50; color: white; font-weight: bold; cursor: pointer; font-size: 12px;">START MONITOR</button>
@@ -101,7 +117,7 @@
             z-index: 1000000; font-family: sans-serif;
         `;
         warningOverlay.innerHTML = `
-            <h1 style="font-size: 48px; margin-bottom: 10px;">EYES ON SCREEN</h1>
+            <h1 style="font-size: 48px; margin-bottom: 10px;">YOU ARE DISTRACTED! STAY FOCUSED!</h1>
             <button id="dismiss-warning" style="padding: 12px 30px; border-radius: 4px; border: none; cursor: pointer; background: white; color: #b40000; font-weight: bold;">BACK TO WORK</button>
         `;
         document.body.appendChild(warningOverlay);
@@ -195,8 +211,14 @@
         const panel = document.getElementById('focus-monitor-panel');
         const icon = document.getElementById('collapse-icon');
         state.panelExpanded = !state.panelExpanded;
-        panel.style.right = state.panelExpanded ? '0px' : '-260px';
-        icon.style.transform = state.panelExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+        
+        if (state.panelExpanded) {
+            panel.classList.add('expanded');
+            icon.style.transform = 'rotate(180deg)';
+        } else {
+            panel.classList.remove('expanded');
+            icon.style.transform = 'rotate(0deg)';
+        }
     }
 
     function showWarning() { document.getElementById('focus-warning').style.display = 'flex'; }
