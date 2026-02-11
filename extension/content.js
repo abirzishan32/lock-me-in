@@ -249,9 +249,19 @@
 
     async function toggleMonitoring() {
         const btn = document.getElementById('toggle-monitor');
-        if (!state.modelsLoaded && !(await loadModels())) return;
 
         if (!state.isActive) {
+            // Privacy Policy Check
+            const privacyMsg = "Lock Me In Privacy Policy:\n\n" +
+                "• This extension requires webcam access to detect attention.\n" +
+                "• All video processing happens locally in your browser.\n" +
+                "• No video data is sent to any server.\n\n" +
+                "Do you consent to webcam usage to proceed?";
+            
+            if (!confirm(privacyMsg)) return;
+
+            if (!state.modelsLoaded && !(await loadModels())) return;
+
             try {
                 state.stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 state.video.srcObject = state.stream;
@@ -260,7 +270,10 @@
                 btn.textContent = 'STOP MONITOR';
                 btn.style.background = '#f44336';
                 document.getElementById('focus-video-container').style.display = 'block';
-            } catch (e) { alert("Camera access required."); }
+            } catch (e) { 
+                console.error(e);
+                alert("Camera access denied or unavailable."); 
+            }
         } else {
             state.isActive = false;
             clearInterval(state.detectionInterval);
